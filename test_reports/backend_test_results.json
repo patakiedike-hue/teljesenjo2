@@ -1,0 +1,112 @@
+{
+  "summary": {
+    "total_tests": 17,
+    "passed_tests": 15,
+    "success_rate": 88.23529411764706,
+    "timestamp": "2026-03-14T10:24:50.333034"
+  },
+  "detailed_results": [
+    {
+      "test_name": "User Registration",
+      "success": true,
+      "details": "",
+      "timestamp": "2026-03-14T10:24:47.413909"
+    },
+    {
+      "test_name": "Registration for Login Test",
+      "success": true,
+      "details": "",
+      "timestamp": "2026-03-14T10:24:47.916648"
+    },
+    {
+      "test_name": "User Login",
+      "success": true,
+      "details": "",
+      "timestamp": "2026-03-14T10:24:48.245124"
+    },
+    {
+      "test_name": "Forgot Password Request",
+      "success": true,
+      "details": "",
+      "timestamp": "2026-03-14T10:24:48.350941"
+    },
+    {
+      "test_name": "Password Reset (Invalid Token)",
+      "success": true,
+      "details": "",
+      "timestamp": "2026-03-14T10:24:48.510456"
+    },
+    {
+      "test_name": "Protected Route Without Auth",
+      "success": false,
+      "details": "Expected 401, got 403 - Not authenticated",
+      "timestamp": "2026-03-14T10:24:48.611306"
+    },
+    {
+      "test_name": "Email Change Request",
+      "success": false,
+      "details": "Expected 200, got 500 - Email k\u00fcld\u00e9si hiba",
+      "timestamp": "2026-03-14T10:24:49.108466"
+    },
+    {
+      "test_name": "Get Current User Profile",
+      "success": true,
+      "details": "",
+      "timestamp": "2026-03-14T10:24:49.253662"
+    },
+    {
+      "test_name": "Get User Profile by ID",
+      "success": true,
+      "details": "",
+      "timestamp": "2026-03-14T10:24:49.355885"
+    },
+    {
+      "test_name": "Update User Profile",
+      "success": true,
+      "details": "",
+      "timestamp": "2026-03-14T10:24:49.502450"
+    },
+    {
+      "test_name": "Create Post",
+      "success": true,
+      "details": "",
+      "timestamp": "2026-03-14T10:24:49.652151"
+    },
+    {
+      "test_name": "Get Posts Feed",
+      "success": true,
+      "details": "",
+      "timestamp": "2026-03-14T10:24:49.749643"
+    },
+    {
+      "test_name": "Get Events",
+      "success": true,
+      "details": "",
+      "timestamp": "2026-03-14T10:24:49.854950"
+    },
+    {
+      "test_name": "Get Highlighted Events",
+      "success": true,
+      "details": "",
+      "timestamp": "2026-03-14T10:24:49.985269"
+    },
+    {
+      "test_name": "Get Wallet Balance",
+      "success": true,
+      "details": "",
+      "timestamp": "2026-03-14T10:24:50.122299"
+    },
+    {
+      "test_name": "Get Friends List",
+      "success": true,
+      "details": "",
+      "timestamp": "2026-03-14T10:24:50.225263"
+    },
+    {
+      "test_name": "Get Pending Friend Requests",
+      "success": true,
+      "details": "",
+      "timestamp": "2026-03-14T10:24:50.332088"
+    }
+  ]
+}
