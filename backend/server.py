@@ -107,10 +107,12 @@ class Comment(BaseModel):
     username: str
     profile_pic: Optional[str] = ""
     content: str
+    image_base64: Optional[str] = ""
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
 class CommentCreate(BaseModel):
     content: str
+    image_base64: Optional[str] = ""
 
 class Event(BaseModel):
     model_config = ConfigDict(extra="ignore")
@@ -833,6 +835,7 @@ async def add_comment(post_id: str, comment_data: CommentCreate, current_user: U
         "username": current_user.username,
         "profile_pic": current_user.profile_pic,
         "content": comment_data.content,
+        "image_base64": comment_data.image_base64 or "",
         "created_at": datetime.now(timezone.utc).isoformat()
     }
 

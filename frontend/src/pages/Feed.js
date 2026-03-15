@@ -42,6 +42,7 @@ export const Feed = () => {
   const [expandedPost, setExpandedPost] = useState(null);
   const [comments, setComments] = useState({});
   const [commentText, setCommentText] = useState({});
+  const [commentImage, setCommentImage] = useState({});
 
   const [highlightedEvents, setHighlightedEvents] = useState([]);
   const [openPost, setOpenPost] = useState(null);
@@ -222,15 +223,22 @@ export const Feed = () => {
 
   const handleComment = async (postId) => {
     const text = commentText[postId];
+    const image = commentImage[postId];
 
-    if (!text?.trim()) return;
+    if (!text?.trim() && !image) return;
 
     try {
       await api.post(`/posts/${postId}/comment`, {
-        content: text
+        content: text || "",
+        image_base64: image || ""
       });
 
       setCommentText((prev) => ({
+        ...prev,
+        [postId]: ""
+      }));
+      
+      setCommentImage((prev) => ({
         ...prev,
         [postId]: ""
       }));
@@ -243,6 +251,24 @@ export const Feed = () => {
       console.error(error);
       toast.error("Hiba történt");
     }
+  };
+  
+  const handleCommentImageUpload = (postId, file) => {
+    if (!file) return;
+    
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error("A kép maximum 5MB lehet");
+      return;
+    }
+    
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setCommentImage((prev) => ({
+        ...prev,
+        [postId]: reader.result
+      }));
+    };
+    reader.readAsDataURL(file);
   };
 
   const toggleComments = async (postId) => {
@@ -445,6 +471,15 @@ export const Feed = () => {
                                 <p className="text-sm break-words whitespace-pre-wrap text-zinc-300">
                                   {comment.content}
                                 </p>
+                                
+                                {comment.image_base64 && (
+                                  <img 
+                                    src={comment.image_base64} 
+                                    alt="Komment kép" 
+                                    className="mt-2 max-h-48 rounded-lg object-cover cursor-pointer hover:opacity-90"
+                                    onClick={() => setOpenPost({...post, viewImage: comment.image_base64})}
+                                  />
+                                )}
 
                                 {(comment.user_id === user?.user_id ||
                                   user?.role === 1) && (
@@ -470,25 +505,57 @@ export const Feed = () => {
                           </div>
                         )}
 
-                        <div className="flex flex-col gap-2 sm:flex-row">
-                          <Textarea
-                            placeholder="Írj kommentet..."
-                            value={commentText[post.post_id] || ""}
-                            onChange={(e) =>
-                              setCommentText((prev) => ({
-                                ...prev,
-                                [post.post_id]: e.target.value
-                              }))
-                            }
-                            className="w-full max-w-full resize-none border-zinc-800 bg-zinc-950 text-white"
-                          />
+                        <div className="flex flex-col gap-2">
+                          {commentImage[post.post_id] && (
+                            <div className="relative">
+                              <img 
+                                src={commentImage[post.post_id]} 
+                                alt="Előnézet" 
+                                className="max-h-32 rounded-lg object-cover"
+                              />
+                              <button
+                                onClick={() => setCommentImage(prev => ({...prev, [post.post_id]: ""}))}
+                                className="absolute -right-2 -top-2 rounded-full bg-red-500 p-1 text-white hover:bg-red-600"
+                                type="button"
+                              >
+                                <X className="h-3 w-3" />
+                              </button>
+                            </div>
+                          )}
+                          
+                          <div className="flex gap-2">
+                            <Textarea
+                              placeholder="Írj kommentet..."
+                              value={commentText[post.post_id] || ""}
+                              onChange={(e) =>
+                                setCommentText((prev) => ({
+                                  ...prev,
+                                  [post.post_id]: e.target.value
+                                }))
+                              }
+                              className="w-full max-w-full resize-none border-zinc-800 bg-zinc-950 text-white"
+                            />
 
-                          <Button
-                            onClick={() => handleComment(post.post_id)}
-                            type="button"
-                          >
-                            <Send className="h-4 w-4" />
-                          </Button>
+                            <div className="flex flex-col gap-1">
+                              <label className="cursor-pointer rounded-md bg-zinc-800 p-2 text-zinc-400 hover:bg-zinc-700 hover:text-white transition">
+                                <ImageIcon className="h-4 w-4" />
+                                <input
+                                  type="file"
+                                  accept="image/*"
+                                  className="hidden"
+                                  onChange={(e) => handleCommentImageUpload(post.post_id, e.target.files?.[0])}
+                                />
+                              </label>
+                              
+                              <Button
+                                onClick={() => handleComment(post.post_id)}
+                                type="button"
+                                size="sm"
+                              >
+                                <Send className="h-4 w-4" />
+                              </Button>
+                            </div>
+                          </div>
                         </div>
                       </div>
                     )}
