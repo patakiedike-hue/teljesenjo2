@@ -690,6 +690,33 @@ async def get_friends(current_user: User = Depends(get_current_user)):
 
     return friends
 
+@fastapi_app.get("/api/friends/list/{target_user_id}")
+async def get_user_friends(target_user_id: str, current_user: User = Depends(get_current_user)):
+    """Más felhasználó ismerőseinek lekérése"""
+    requests = await db.friend_requests.find(
+        {
+            "$or": [
+                {"from_user_id": target_user_id, "status": "accepted"},
+                {"to_user_id": target_user_id, "status": "accepted"}
+            ]
+        },
+        {"_id": 0}
+    ).to_list(1000)
+
+    friend_ids = []
+    for req in requests:
+        if req["from_user_id"] == target_user_id:
+            friend_ids.append(req["to_user_id"])
+        else:
+            friend_ids.append(req["from_user_id"])
+
+    friends = await db.users.find(
+        {"user_id": {"$in": friend_ids}},
+        {"_id": 0, "user_id": 1, "username": 1, "profile_pic": 1, "online_status": 1, "last_seen": 1}
+    ).to_list(1000)
+
+    return friends
+
 @fastapi_app.get("/api/friends/status/{target_user_id}")
 async def get_friendship_status(target_user_id: str, current_user: User = Depends(get_current_user)):
     if target_user_id == current_user.user_id:

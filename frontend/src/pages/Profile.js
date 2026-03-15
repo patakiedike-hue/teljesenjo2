@@ -127,7 +127,9 @@ export const Profile = () => {
 
   const fetchFriends = async () => {
     try {
-      const res = await api.get("/friends/list");
+      // Ha saját profil, akkor /friends/list, egyébként a megtekintett user ismerőseit
+      const endpoint = isOwnProfile ? "/friends/list" : `/friends/list/${userId}`;
+      const res = await api.get(endpoint);
       setFriends(res.data);
     } catch (e) {
       console.error(e);

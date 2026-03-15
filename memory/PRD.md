@@ -41,6 +41,14 @@
   - Megerősítő email az új címre
 ✅ Verification email újraküldés endpoint
 
+## Implementált Funkciók (2026-03-15)
+✅ Események "Bővebben" gomb:
+  - Leírás kibontása/összecsukása
+  - "Teljes esemény megtekintése" gomb -> Dialog ablak teljes tartalommal
+✅ Profil ismerősök javítása:
+  - Más profil megtekintésekor az ő ismerőseit mutatja
+  - Új backend endpoint: /api/friends/list/{user_id}
+
 ## Backlog / Jövőbeli Fejlesztések
 - P0: -
 - P1: Email template-ek testreszabása

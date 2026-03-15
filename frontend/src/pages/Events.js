@@ -30,7 +30,9 @@ import {
   Search,
   BadgeCheck,
   Clock3,
-  Filter
+  Filter,
+  ChevronDown,
+  ExternalLink
 } from "lucide-react";
 
 import { format } from "date-fns";
@@ -52,6 +54,9 @@ export const Events = () => {
   const [showOnlyHighlighted, setShowOnlyHighlighted] = useState(false);
 
   const [now, setNow] = useState(Date.now());
+  
+  const [expandedEvents, setExpandedEvents] = useState({});
+  const [selectedEvent, setSelectedEvent] = useState(null);
 
   const [formData, setFormData] = useState({
     title: "",
@@ -889,9 +894,34 @@ const highlightedEvents = useMemo(() => {
 
                   <CardContent>
 
-                    <p className="text-sm text-zinc-300 mb-4 line-clamp-4 min-h-[80px]">
+                    <p className={`text-sm text-zinc-300 mb-4 min-h-[80px] whitespace-pre-wrap ${!expandedEvents[event.event_id] ? 'line-clamp-4' : ''}`}>
                       {event.description}
                     </p>
+                    
+                    {event.description && event.description.length > 200 && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => setExpandedEvents(prev => ({
+                          ...prev,
+                          [event.event_id]: !prev[event.event_id]
+                        }))}
+                        className="text-primary hover:text-orange-400 mb-3 p-0 h-auto"
+                      >
+                        <ChevronDown className={`w-4 h-4 mr-1 transition-transform ${expandedEvents[event.event_id] ? 'rotate-180' : ''}`} />
+                        {expandedEvents[event.event_id] ? 'Kevesebb' : 'Bővebben'}
+                      </Button>
+                    )}
+                    
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setSelectedEvent(event)}
+                      className="w-full mb-4 border-zinc-700 text-zinc-300 hover:bg-zinc-800"
+                    >
+                      <ExternalLink className="w-4 h-4 mr-2" />
+                      Teljes esemény megtekintése
+                    </Button>
 
                     <div className="mb-3">
                       <div className="w-full bg-zinc-800 h-2 rounded-full overflow-hidden">
@@ -974,6 +1004,131 @@ const highlightedEvents = useMemo(() => {
         )}
 
       </div>
+      
+      {/* Teljes esemény megtekintése Dialog */}
+      <Dialog open={!!selectedEvent} onOpenChange={(open) => !open && setSelectedEvent(null)}>
+        <DialogContent className="bg-zinc-900 border-white/10 text-white max-w-3xl max-h-[90vh] overflow-y-auto">
+          {selectedEvent && (
+            <>
+              <DialogHeader>
+                <DialogTitle className="text-2xl uppercase font-chakra flex items-center gap-3">
+                  {selectedEvent.title}
+                  {selectedEvent.highlighted && (
+                    <span className="rounded-full bg-orange-500/15 border border-orange-500/20 px-2 py-1 text-orange-400 text-xs font-semibold">
+                      Kiemelt
+                    </span>
+                  )}
+                </DialogTitle>
+              </DialogHeader>
+              
+              {selectedEvent.image_base64 && (
+                <img
+                  src={selectedEvent.image_base64}
+                  alt={selectedEvent.title}
+                  className="w-full h-64 object-cover rounded-lg"
+                />
+              )}
+              
+              <div className="space-y-4">
+                <div className="flex flex-wrap gap-3 text-sm text-zinc-400">
+                  <div className="flex items-center gap-2">
+                    <Calendar size={16} className="text-primary" />
+                    {formatDateSafe(selectedEvent.date)}
+                  </div>
+                  
+                  {getEffectiveEndDate(selectedEvent) && (
+                    <div className="flex items-center gap-2">
+                      <Clock3 size={16} className="text-primary" />
+                      Vége: {formatDateSafe(getEffectiveEndDate(selectedEvent))}
+                    </div>
+                  )}
+                  
+                  <div className="flex items-center gap-2">
+                    <MapPin size={16} className="text-primary" />
+                    {selectedEvent.city}
+                  </div>
+                  
+                  <div className="flex items-center gap-2">
+                    <DollarSign size={16} className="text-primary" />
+                    {selectedEvent.entry_fee} Ft
+                  </div>
+                </div>
+                
+                <div className="flex flex-wrap gap-2">
+                  <div className={`inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold ${getEventStatusClasses(selectedEvent)}`}>
+                    {getEventStatusLabel(selectedEvent)}
+                  </div>
+                  
+                  {selectedEvent.is_official && (
+                    <div className="inline-flex items-center gap-2 rounded-full bg-green-500/10 border border-green-500/20 px-3 py-1 text-green-400 text-xs font-semibold">
+                      <BadgeCheck className="h-3.5 w-3.5" />
+                      Bejelentett esemény
+                    </div>
+                  )}
+                </div>
+                
+                <div className="border-t border-zinc-800 pt-4">
+                  <h3 className="text-lg font-semibold mb-3 text-white">Leírás</h3>
+                  <p className="text-zinc-300 whitespace-pre-wrap leading-relaxed">
+                    {selectedEvent.description}
+                  </p>
+                </div>
+                
+                <div className="border-t border-zinc-800 pt-4">
+                  <div className="mb-3">
+                    <div className="w-full bg-zinc-800 h-2 rounded-full overflow-hidden">
+                      <div
+                        className="bg-green-500 h-2 rounded-full transition-all"
+                        style={{ 
+                          width: `${((selectedEvent.going_count || 0) + (selectedEvent.not_going_count || 0)) > 0 
+                            ? ((selectedEvent.going_count || 0) / ((selectedEvent.going_count || 0) + (selectedEvent.not_going_count || 0))) * 100 
+                            : 0}%` 
+                        }}
+                      />
+                    </div>
+                  </div>
+                  
+                  <div className="flex justify-between text-sm mb-4">
+                    <span className="text-green-400">{selectedEvent.going_count || 0} fő ott lesz</span>
+                    <span className="text-red-400">{selectedEvent.not_going_count || 0} fő nem jön</span>
+                  </div>
+                  
+                  <div className="grid grid-cols-2 gap-2 text-xs text-zinc-500 mb-4">
+                    <div>Kezdésig: {getCountdown(selectedEvent.date)}</div>
+                    <div>Végéig: {getUntilEnd(selectedEvent)}</div>
+                  </div>
+                  
+                  <div className="flex gap-2">
+                    <Button
+                      size="sm"
+                      onClick={() => {
+                        handleRSVP(selectedEvent.event_id, "going");
+                        setSelectedEvent(null);
+                      }}
+                      className="flex-1 bg-green-600 hover:bg-green-700"
+                    >
+                      <Check size={16} className="mr-1" />
+                      Ott leszek
+                    </Button>
+                    
+                    <Button
+                      size="sm"
+                      onClick={() => {
+                        handleRSVP(selectedEvent.event_id, "not_going");
+                        setSelectedEvent(null);
+                      }}
+                      className="flex-1 bg-red-600 hover:bg-red-700"
+                    >
+                      <X size={16} className="mr-1" />
+                      Nem jövök
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            </>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
